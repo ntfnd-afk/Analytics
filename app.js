@@ -6,7 +6,6 @@
  *    ID кампании | Источник трафика | Артикул WB | Название товара | Дата | 
  *    Показы | Клики | CTR % | Затраты, ₽ | Добавления в корзину | Заказано товаров, шт | Заказано на сумму, ₽
  */
-const DEFAULT_SHEET_ID = '1H6WxKWm4Ea3IShhSKGu63OpZuyNMZ-VSKmqUjwzoFLQ';            // можешь сразу вписать ID, иначе бери из поля UI
 const DEFAULT_SHEET_NAME = 'WB_Stats_NM_Daily';
 
 // соответствие названий столбцов
@@ -32,30 +31,75 @@ let charts = {};
 
 // UI
 const $ = id => document.getElementById(id);
-$('sheetId').value = DEFAULT_SHEET_ID;
 $('sheetName').value = DEFAULT_SHEET_NAME;
+
+// Уведомления
+function showStatus(message, isError = false) {
+  const status = $('status');
+  status.textContent = message;
+  status.className = `status show ${isError ? 'error' : ''}`;
+  setTimeout(() => status.classList.remove('show'), 3000);
+}
+
+// Валидация данных
+function validateSheetData(rows, cols) {
+  const requiredColumns = Object.values(COL);
+  const missingColumns = requiredColumns.filter(col => !cols.includes(col));
+  
+  if (missingColumns.length > 0) {
+    showStatus(`Отсутствуют столбцы: ${missingColumns.join(', ')}`, true);
+    return false;
+  }
+  
+  if (rows.length < 2) {
+    showStatus('Недостаточно данных в таблице', true);
+    return false;
+  }
+  
+  return true;
+}
 
 // ---- загрузка из Google Sheets (GViz) ----
 // Формат: https://docs.google.com/spreadsheets/d/<id>/gviz/tq?sheet=<name>
 async function fetchSheet(sheetId, sheetName) {
   const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tqx=out:json`;
-  const res = await fetch(url, { cache: 'no-cache' });
-  const txt = await res.text();
+  
+  try {
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+    
+    const txt = await res.text();
 
-  // Универсальный парсер GViz (поддерживает и setResponse(...), и ({...}))
-  const match = txt.match(/\{[\s\S]*\}/);
-  if (!match) {
-    console.error('GViz raw:', txt.slice(0, 200));
-    throw new Error('GViz: не удалось найти JSON-пэйлоад');
+    // Универсальный парсер GViz (поддерживает и setResponse(...), и ({...}))
+    const match = txt.match(/\{[\s\S]*\}/);
+    if (!match) {
+      console.error('GViz raw:', txt.slice(0, 200));
+      throw new Error('GViz: не удалось найти JSON-пэйлоад');
+    }
+    
+    const json = JSON.parse(match[0]);
+    
+    if (json.errors && json.errors.length > 0) {
+      throw new Error(`GViz ошибка: ${json.errors[0].detailed_message || json.errors[0].message}`);
+    }
+
+    const cols = (json.table?.cols || []).map(c => c.label || c.id);
+    const rows = (json.table?.rows || []).map(r => cols.map((_, i) => (r.c?.[i]?.v ?? '')));
+
+    // Валидация данных
+    if (!validateSheetData(rows, cols)) {
+      throw new Error('Данные не прошли валидацию');
+    }
+
+    // кэш
+    localStorage.setItem('wb_cache', JSON.stringify({ ts: Date.now(), rows, cols, sheetId, sheetName }));
+    return { rows, cols };
+  } catch (error) {
+    console.error('Ошибка загрузки данных:', error);
+    throw error;
   }
-  const json = JSON.parse(match[0]);
-
-  const cols = (json.table?.cols || []).map(c => c.label || c.id);
-  const rows = (json.table?.rows || []).map(r => cols.map((_, i) => (r.c?.[i]?.v ?? '')));
-
-  // кэш
-  localStorage.setItem('wb_cache', JSON.stringify({ ts: Date.now(), rows, cols, sheetId, sheetName }));
-  return { rows, cols };
 }
 
 
@@ -203,37 +247,89 @@ function renderCharts() {
 
 // ---- загрузка + события ----
 async function load() {
-  const sheetId = $('sheetId').value.trim() || DEFAULT_SHEET_ID;
+  const sheetId = $('sheetId').value.trim();
   const sheetName = $('sheetName').value.trim() || DEFAULT_SHEET_NAME;
-  if (!sheetId) { alert('Укажи Sheet ID (из URL Google Sheets)'); return; }
+  
+  if (!sheetId) { 
+    showStatus('Укажите Sheet ID (из URL Google Sheets)', true);
+    return; 
+  }
 
   $('reload').disabled = true;
+  showStatus('Загрузка данных...');
 
   try {
     let rows, cols;
+    let fromCache = false;
+    
     // сначала пробуем из сети
     try {
       const net = await fetchSheet(sheetId, sheetName);
       rows = net.rows; cols = net.cols;
+      showStatus('Данные загружены успешно');
     } catch (e) {
       // оффлайн → из кэша
       const cache = loadCacheIfAny();
-      if (!cache) throw e;
+      if (!cache) {
+        showStatus(`Ошибка загрузки: ${e.message}`, true);
+        throw e;
+      }
       rows = cache.rows; cols = cache.cols;
+      fromCache = true;
+      showStatus('Используются кэшированные данные', true);
     }
+    
     RAW = rowsToObjects(rows, cols);
     updateSelectors();
     applyFilters();
+    
+    if (fromCache) {
+      showStatus('Работа в офлайн режиме', true);
+    }
+  } catch (error) {
+    console.error('Критическая ошибка:', error);
+    showStatus(`Ошибка: ${error.message}`, true);
   } finally {
     $('reload').disabled = false;
   }
 }
 
+// Обработчики событий
 $('reload').onclick = load;
-$('reset').onclick = () => { $('nmId').value=''; $('appType').value=''; load(); };
+$('reset').onclick = () => { 
+  $('nmId').value=''; 
+  $('appType').value=''; 
+  $('dateFrom').value='';
+  $('dateTo').value='';
+  load(); 
+};
+
 $('nmId').onchange = applyFilters;
 $('appType').onchange = applyFilters;
 $('dateFrom').onchange = applyFilters;
 $('dateTo').onchange = applyFilters;
 
-window.addEventListener('load', load);
+// Автозагрузка при изменении Sheet ID
+$('sheetId').onchange = load;
+$('sheetName').onchange = load;
+
+// Горячие клавиши
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    switch(e.key) {
+      case 'r':
+        e.preventDefault();
+        load();
+        break;
+      case 'Enter':
+        e.preventDefault();
+        load();
+        break;
+    }
+  }
+});
+
+// Инициализация
+window.addEventListener('load', () => {
+  showStatus('Готов к работе');
+});

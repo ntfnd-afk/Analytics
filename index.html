@@ -9,83 +9,388 @@
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <style>
-    :root{ --bg:#0b1220; --panel:#111827; --muted:#94a3b8; --text:#e5e7eb; --accent:#38bdf8; }
-    html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Arial}
-    header{padding:14px 16px;border-bottom:1px solid #1f2937;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    header h1{font-size:18px;margin:0 12px 0 0}
-    .panel{background:var(--panel);border:1px solid #1f2937;border-radius:12px;padding:12px;margin:12px}
-    .grid{display:grid;gap:12px}
-    .grid.cols-2{grid-template-columns:1fr 1fr}
-    label{display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:12px}
-    select,input{background:#0f172a;color:var(--text);border:1px solid #1f2937;border-radius:8px;padding:8px}
-    button{background:var(--accent);color:#042033;border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
-    button:disabled{opacity:.5;cursor:not-allowed}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    footer{color:#64748b;padding:16px;text-align:center}
-    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-    .kpi .card{background:#0f172a;border:1px solid #1f2937;border-radius:12px;padding:12px}
-    .kpi .card h3{margin:0 0 6px 0;color:var(--muted);font-size:12px;font-weight:600}
-    .kpi .card div{font-size:20px;font-weight:700}
-    canvas{background:#0f172a;border:1px solid #1f2937;border-radius:12px;padding:8px}
-    @media (max-width:900px){ .grid.cols-2{grid-template-columns:1fr} .kpi{grid-template-columns:repeat(2,1fr);} }
+    :root {
+      --bg: #0a0e1a;
+      --panel: #1a1f2e;
+      --panel-hover: #1f2432;
+      --muted: #8b95a7;
+      --text: #e8eaed;
+      --text-secondary: #b8c2d1;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #2d3748;
+      --border-light: #374151;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    * { box-sizing: border-box; }
+    html, body { height: 100vh; margin: 0; padding: 0; overflow: hidden; }
+    body {
+      background: linear-gradient(135deg, var(--bg) 0%, #0f1419 100%);
+      color: var(--text);
+      font: 13px/1.5 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Header */
+    .header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+      box-shadow: var(--shadow);
+    }
+    
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    
+    /* Controls */
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 120px;
+    }
+    
+    .control-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .control-input {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 12px;
+      transition: all 0.2s ease;
+    }
+    
+    .control-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .control-input:hover {
+      border-color: var(--border-light);
+    }
+    
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .btn:hover:not(:disabled) {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--panel-hover);
+      color: var(--text);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      padding: 12px;
+      overflow: hidden;
+    }
+    
+    /* KPI Cards */
+    .kpi-section {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    
+    .kpi-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--border-light);
+    }
+    
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), #8b5cf6);
+    }
+    
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 6px 0;
+    }
+    
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+    
+    /* Charts */
+    .chart-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .chart-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin: 0 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .chart-container {
+      flex: 1;
+      position: relative;
+      min-height: 200px;
+    }
+    
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    
+    /* Status */
+    .status {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--success);
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+    
+    .status.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .status.error {
+      color: var(--danger);
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .main-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+      }
+      
+      .kpi-section {
+        grid-column: 1;
+      }
+      
+      .chart-panel:last-child {
+        grid-column: 1;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+      
+      .header-controls {
+        justify-content: center;
+      }
+      
+      .kpi-section {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .control-group {
+        min-width: 100px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .kpi-section {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-controls {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
   </style>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <header>
+  <header class="header">
     <h1>WB Ads Dashboard</h1>
-    <div class="row">
-      <label>Таблица (Sheet ID)
-        <input id="sheetId" placeholder="1AbCDEF... (ID из URL таблицы)">
-      </label>
-      <label>Лист с данными
-        <input id="sheetName" value="WB_Stats_NM_Daily">
-      </label>
-      <label>Артикул WB (nmId)
-        <select id="nmId"></select>
-      </label>
-      <label>Источник трафика
-        <select id="appType"></select>
-      </label>
-      <label>Дата с
-        <input id="dateFrom" type="date">
-      </label>
-      <label>Дата по
-        <input id="dateTo" type="date">
-      </label>
-      <div class="row" style="align-items:flex-end">
-        <button id="reload">Обновить</button>
-        <button id="reset">Сброс</button>
+    <div class="header-controls">
+      <div class="control-group">
+        <label class="control-label">Таблица (Sheet ID)</label>
+        <input id="sheetId" class="control-input" placeholder="1AbCDEF... (ID из URL таблицы)">
+      </div>
+      <div class="control-group">
+        <label class="control-label">Лист с данными</label>
+        <input id="sheetName" class="control-input" value="WB_Stats_NM_Daily">
+      </div>
+      <div class="control-group">
+        <label class="control-label">Артикул WB (nmId)</label>
+        <select id="nmId" class="control-input"></select>
+      </div>
+      <div class="control-group">
+        <label class="control-label">Источник трафика</label>
+        <select id="appType" class="control-input"></select>
+      </div>
+      <div class="control-group">
+        <label class="control-label">Дата с</label>
+        <input id="dateFrom" class="control-input" type="date">
+      </div>
+      <div class="control-group">
+        <label class="control-label">Дата по</label>
+        <input id="dateTo" class="control-input" type="date">
+      </div>
+      <div class="control-group">
+        <label class="control-label">&nbsp;</label>
+        <div style="display: flex; gap: 6px;">
+          <button id="reload" class="btn">🔄 Обновить</button>
+          <button id="reset" class="btn btn-secondary">↺ Сброс</button>
+        </div>
       </div>
     </div>
   </header>
 
-  <section class="panel">
-    <div class="kpi">
-      <div class="card"><h3>Затраты, ₽</h3><div id="kpiSpend">—</div></div>
-      <div class="card"><h3>Заказы, ₽</h3><div id="kpiRevenue">—</div></div>
-      <div class="card"><h3>CTR %</h3><div id="kpiCtr">—</div></div>
-      <div class="card"><h3>ROAS</h3><div id="kpiRoas">—</div></div>
+  <div class="main-content">
+    <div class="kpi-section">
+      <div class="kpi-card">
+        <div class="kpi-label">Затраты, ₽</div>
+        <div class="kpi-value" id="kpiSpend">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Заказы, ₽</div>
+        <div class="kpi-value" id="kpiRevenue">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">CTR %</div>
+        <div class="kpi-value" id="kpiCtr">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ROAS</div>
+        <div class="kpi-value" id="kpiRoas">—</div>
+      </div>
     </div>
-  </section>
 
-  <section class="grid cols-2">
-    <div class="panel"><h3 style="margin:0 0 8px 0;color:#9aa7b8">Динамика: Затраты vs Заказы</h3>
-      <canvas id="lineSpendOrders" height="260"></canvas>
+    <div class="chart-panel">
+      <h3 class="chart-title">Динамика: Затраты vs Заказы</h3>
+      <div class="chart-container">
+        <canvas id="lineSpendOrders"></canvas>
+      </div>
     </div>
-    <div class="panel"><h3 style="margin:0 0 8px 0;color:#9aa7b8">Клики и Показы</h3>
-      <canvas id="barClicksShows" height="260"></canvas>
+
+    <div class="chart-panel">
+      <h3 class="chart-title">Клики и Показы</h3>
+      <div class="chart-container">
+        <canvas id="barClicksShows"></canvas>
+      </div>
     </div>
-  </section>
 
-  <section class="panel">
-    <h3 style="margin:0 0 8px 0;color:#9aa7b8">Корреляция: Затраты → Заказы (по дням)</h3>
-    <canvas id="scatterCorr" height="280"></canvas>
-  </section>
+    <div class="chart-panel" style="grid-column: 1 / -1;">
+      <h3 class="chart-title">Корреляция: Затраты → Заказы (по дням)</h3>
+      <div class="chart-container">
+        <canvas id="scatterCorr"></canvas>
+      </div>
+    </div>
+  </div>
 
-  <footer>Работает офлайн • Данные кэшируются локально • © WB Dashboard</footer>
+  <div class="status" id="status"></div>
 
   <script src="app.js"></script>
   <script> if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js'); </script>
