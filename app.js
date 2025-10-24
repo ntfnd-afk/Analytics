@@ -203,45 +203,120 @@ function renderCharts() {
   const clicks = labels.map(d => byDay[d].clicks);
   const shows  = labels.map(d => byDay[d].shows);
 
+  // Общие настройки для всех графиков
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: { color: '#374151', font: { size: 12 } }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#111827',
+        bodyColor: '#374151',
+        borderColor: '#e5e7eb',
+        borderWidth: 1
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#6b7280', font: { size: 11 } } },
+      y: { ticks: { color: '#6b7280', font: { size: 11 } } }
+    }
+  };
+
   // line: spend vs orders
   chart('lineSpendOrders','line',{
     labels,
     datasets:[
-      { label:'Затраты, ₽', data: spend },
-      { label:'Заказы, ₽', data: orders }
+      { 
+        label:'Затраты, ₽', 
+        data: spend,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        fill: true
+      },
+      { 
+        label:'Заказы, ₽', 
+        data: orders,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        tension: 0.4,
+        fill: true
+      }
     ]
-  },{
-    responsive:true, interaction:{mode:'index',intersect:false},
-    plugins:{legend:{labels:{color:'#cbd5e1'}}, tooltip:{}},
-    scales:{x:{ticks:{color:'#9aa7b8'}}, y:{ticks:{color:'#9aa7b8'}}}
+  }, {
+    ...commonOptions,
+    interaction: { mode: 'index', intersect: false }
   });
 
   // bar: clicks + shows (в две оси)
   chart('barClicksShows','bar',{
     labels,
     datasets:[
-      { label:'Клики', data: clicks, yAxisID:'y' },
-      { label:'Показы', data: shows, yAxisID:'y1' }
+      { 
+        label:'Клики', 
+        data: clicks, 
+        yAxisID:'y',
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderColor: '#3b82f6',
+        borderWidth: 1
+      },
+      { 
+        label:'Показы', 
+        data: shows, 
+        yAxisID:'y1',
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderColor: '#10b981',
+        borderWidth: 1
+      }
     ]
-  },{
-    responsive:true,
-    plugins:{legend:{labels:{color:'#cbd5e1'}}},
-    scales:{
-      x:{ticks:{color:'#9aa7b8'}},
-      y:{position:'left', ticks:{color:'#9aa7b8'}},
-      y1:{position:'right', grid:{drawOnChartArea:false}, ticks:{color:'#9aa7b8'}}
+  }, {
+    ...commonOptions,
+    scales: {
+      ...commonOptions.scales,
+      y: { 
+        position: 'left', 
+        ticks: { color: '#6b7280', font: { size: 11 } },
+        grid: { color: '#f3f4f6' }
+      },
+      y1: { 
+        position: 'right', 
+        grid: { drawOnChartArea: false }, 
+        ticks: { color: '#6b7280', font: { size: 11 } }
+      }
     }
   });
 
-  // scatter: корреляция spend vs revenue
+  // scatter: корреляция spend vs revenue (уменьшенный)
   const points = labels.map((d,i)=>({x:spend[i], y:orders[i], label:d}));
   chart('scatterCorr','scatter',{
-    datasets:[{ label:'Дни (точки)', data: points, parsing:false }]
-  },{
-    plugins:{legend:{labels:{color:'#cbd5e1'}}},
-    scales:{x:{title:{display:true,text:'Затраты, ₽'}, ticks:{color:'#9aa7b8'}},
-            y:{title:{display:true,text:'Заказано на сумму, ₽'}, ticks:{color:'#9aa7b8'}}},
-    parsing:false
+    datasets:[{ 
+      label:'Дни (точки)', 
+      data: points, 
+      parsing: false,
+      backgroundColor: 'rgba(59, 130, 246, 0.6)',
+      borderColor: '#3b82f6',
+      pointRadius: 6,
+      pointHoverRadius: 8
+    }]
+  }, {
+    ...commonOptions,
+    scales: {
+      ...commonOptions.scales,
+      x: {
+        title: { display: true, text: 'Затраты, ₽', color: '#374151', font: { size: 12 } },
+        ticks: { color: '#6b7280', font: { size: 11 } },
+        grid: { color: '#f3f4f6' }
+      },
+      y: {
+        title: { display: true, text: 'Заказано на сумму, ₽', color: '#374151', font: { size: 12 } },
+        ticks: { color: '#6b7280', font: { size: 11 } },
+        grid: { color: '#f3f4f6' }
+      }
+    },
+    parsing: false
   });
 }
 
