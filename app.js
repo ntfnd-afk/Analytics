@@ -184,10 +184,17 @@ function updateKPIs() {
 function chart(id, type, data, options){
   charts[id]?.destroy();
   const ctx = document.getElementById(id);
+  if (!ctx) {
+    console.error(`Canvas element with id '${id}' not found`);
+    return;
+  }
+  console.log(`Creating chart ${id} with type ${type}`);
   charts[id] = new Chart(ctx, { type, data, options });
 }
 
 function renderCharts() {
+  console.log('Rendering charts with', FILTERED.length, 'records');
+  
   // группировка по дню
   const byDay = {};
   FILTERED.forEach(r=>{
@@ -202,6 +209,8 @@ function renderCharts() {
   const orders = labels.map(d => round2(byDay[d].revenue));
   const clicks = labels.map(d => byDay[d].clicks);
   const shows  = labels.map(d => byDay[d].shows);
+  
+  console.log('Chart data:', { labels, spend, orders, clicks, shows });
 
   // Общие настройки для всех графиков
   const commonOptions = {
@@ -356,7 +365,11 @@ async function load() {
     
     RAW = rowsToObjects(rows, cols);
     updateSelectors();
-    applyFilters();
+    
+    // Небольшая задержка для рендеринга графиков
+    setTimeout(() => {
+      applyFilters();
+    }, 100);
     
     if (fromCache) {
       showStatus('Работа в офлайн режиме', true);
