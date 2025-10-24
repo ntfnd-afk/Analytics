@@ -163,67 +163,23 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      padding: 16px;
-      overflow: hidden;
+      gap: 20px;
+      padding: 20px;
+      overflow: auto;
     }
     
     /* KPI Cards */
     .kpi-section {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      height: 80px;
-    }
-    
-    /* Charts Container */
-    .charts-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
       gap: 16px;
-    }
-    
-    .charts-row {
-      display: flex;
-      gap: 16px;
-      height: 300px;
-    }
-    
-    .chart-panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: var(--shadow);
-      flex: 1;
-    }
-    
-    .chart-panel.full-width {
-      height: 250px;
-    }
-    
-    .chart-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin: 0 0 12px 0;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .chart-container {
-      flex: 1;
-      position: relative;
     }
     
     .kpi-card {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 12px 16px;
+      padding: 16px;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
@@ -267,6 +223,48 @@
       letter-spacing: -0.5px;
     }
     
+    /* Charts Container */
+    .charts-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .charts-row {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .chart-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      flex: 1;
+      min-height: 300px;
+    }
+    
+    .chart-panel.full-width {
+      min-height: 250px;
+    }
+    
+    .chart-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin: 0 0 16px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .chart-container {
+      flex: 1;
+      position: relative;
+      min-height: 200px;
+    }
     
     canvas {
       width: 100% !important;
@@ -307,15 +305,14 @@
     @media (max-width: 1200px) {
       .charts-row {
         flex-direction: column;
-        height: auto;
       }
       
       .chart-panel {
-        height: 250px;
+        min-height: 250px;
       }
       
       .chart-panel.full-width {
-        height: 200px;
+        min-height: 200px;
       }
     }
     
