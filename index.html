@@ -161,20 +161,64 @@
     /* Main Content */
     .main-content {
       flex: 1;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto 40% 30%;
-      gap: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
       padding: 16px;
       overflow: hidden;
     }
     
     /* KPI Cards */
     .kpi-section {
-      grid-column: 1 / -1;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
+      height: 80px;
+    }
+    
+    /* Charts Container */
+    .charts-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      height: 250px;
+    }
+    
+    .chart-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      height: 100%;
+    }
+    
+    .chart-panel.full-width {
+      height: 200px;
+    }
+    
+    .chart-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin: 0 0 12px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .chart-container {
+      flex: 1;
+      position: relative;
     }
     
     .kpi-card {
@@ -225,37 +269,6 @@
       letter-spacing: -0.5px;
     }
     
-    /* Charts */
-    .chart-panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      height: 100%;
-    }
-    
-    .chart-panel:last-child {
-      grid-column: 1 / -1;
-    }
-    
-    .chart-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin: 0 0 12px 0;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .chart-container {
-      flex: 1;
-      position: relative;
-      height: calc(100% - 32px);
-    }
     
     canvas {
       width: 100% !important;
@@ -413,24 +426,28 @@
       </div>
     </div>
 
-    <div class="chart-panel">
-      <h3 class="chart-title">Динамика: Затраты vs Заказы</h3>
-      <div class="chart-container">
-        <canvas id="lineSpendOrders"></canvas>
-      </div>
-    </div>
+    <div class="charts-container">
+      <div class="charts-row">
+        <div class="chart-panel">
+          <h3 class="chart-title">Динамика: Затраты vs Заказы</h3>
+          <div class="chart-container">
+            <canvas id="lineSpendOrders"></canvas>
+          </div>
+        </div>
 
-    <div class="chart-panel">
-      <h3 class="chart-title">Клики и Показы</h3>
-      <div class="chart-container">
-        <canvas id="barClicksShows"></canvas>
+        <div class="chart-panel">
+          <h3 class="chart-title">Клики и Показы</h3>
+          <div class="chart-container">
+            <canvas id="barClicksShows"></canvas>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="chart-panel" style="grid-column: 1 / -1;">
-      <h3 class="chart-title">Корреляция: Затраты → Заказы (по дням)</h3>
-      <div class="chart-container">
-        <canvas id="scatterCorr"></canvas>
+      <div class="chart-panel full-width">
+        <h3 class="chart-title">Корреляция: Затраты → Заказы (по дням)</h3>
+        <div class="chart-container">
+          <canvas id="scatterCorr"></canvas>
+        </div>
       </div>
     </div>
   </div>
