@@ -163,8 +163,8 @@
       flex: 1;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto 40% 30%;
-      gap: 16px;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
       padding: 16px;
       overflow: hidden;
     }
@@ -175,6 +175,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
+      margin-bottom: 8px;
     }
     
     .kpi-card {
@@ -230,7 +231,7 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -243,10 +244,10 @@
     }
     
     .chart-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text-secondary);
-      margin: 0 0 16px 0;
+      margin: 0 0 12px 0;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -254,7 +255,7 @@
     .chart-container {
       flex: 1;
       position: relative;
-      height: calc(100% - 40px);
+      height: calc(100% - 32px);
     }
     
     canvas {
@@ -296,11 +297,13 @@
     @media (max-width: 1200px) {
       .main-content {
         grid-template-columns: 1fr;
-        grid-template-rows: auto 35% 35% 30%;
+        grid-template-rows: auto 1fr auto;
+        gap: 8px;
       }
       
       .kpi-section {
         grid-column: 1;
+        margin-bottom: 4px;
       }
       
       .chart-panel:last-child {
