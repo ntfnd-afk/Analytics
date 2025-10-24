@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WB Ads Dashboard</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0ea5e9">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <style>
+    :root{ --bg:#0b1220; --panel:#111827; --muted:#94a3b8; --text:#e5e7eb; --accent:#38bdf8; }
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Arial}
+    header{padding:14px 16px;border-bottom:1px solid #1f2937;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    header h1{font-size:18px;margin:0 12px 0 0}
+    .panel{background:var(--panel);border:1px solid #1f2937;border-radius:12px;padding:12px;margin:12px}
+    .grid{display:grid;gap:12px}
+    .grid.cols-2{grid-template-columns:1fr 1fr}
+    label{display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:12px}
+    select,input{background:#0f172a;color:var(--text);border:1px solid #1f2937;border-radius:8px;padding:8px}
+    button{background:var(--accent);color:#042033;border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    footer{color:#64748b;padding:16px;text-align:center}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .kpi .card{background:#0f172a;border:1px solid #1f2937;border-radius:12px;padding:12px}
+    .kpi .card h3{margin:0 0 6px 0;color:var(--muted);font-size:12px;font-weight:600}
+    .kpi .card div{font-size:20px;font-weight:700}
+    canvas{background:#0f172a;border:1px solid #1f2937;border-radius:12px;padding:8px}
+    @media (max-width:900px){ .grid.cols-2{grid-template-columns:1fr} .kpi{grid-template-columns:repeat(2,1fr);} }
+  </style>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>WB Ads Dashboard</h1>
+    <div class="row">
+      <label>Таблица (Sheet ID)
+        <input id="sheetId" placeholder="1AbCDEF... (ID из URL таблицы)">
+      </label>
+      <label>Лист с данными
+        <input id="sheetName" value="WB_Stats_NM_Daily">
+      </label>
+      <label>Артикул WB (nmId)
+        <select id="nmId"></select>
+      </label>
+      <label>Источник трафика
+        <select id="appType"></select>
+      </label>
+      <label>Дата с
+        <input id="dateFrom" type="date">
+      </label>
+      <label>Дата по
+        <input id="dateTo" type="date">
+      </label>
+      <div class="row" style="align-items:flex-end">
+        <button id="reload">Обновить</button>
+        <button id="reset">Сброс</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="kpi">
+      <div class="card"><h3>Затраты, ₽</h3><div id="kpiSpend">—</div></div>
+      <div class="card"><h3>Заказы, ₽</h3><div id="kpiRevenue">—</div></div>
+      <div class="card"><h3>CTR %</h3><div id="kpiCtr">—</div></div>
+      <div class="card"><h3>ROAS</h3><div id="kpiRoas">—</div></div>
+    </div>
+  </section>
+
+  <section class="grid cols-2">
+    <div class="panel"><h3 style="margin:0 0 8px 0;color:#9aa7b8">Динамика: Затраты vs Заказы</h3>
+      <canvas id="lineSpendOrders" height="260"></canvas>
+    </div>
+    <div class="panel"><h3 style="margin:0 0 8px 0;color:#9aa7b8">Клики и Показы</h3>
+      <canvas id="barClicksShows" height="260"></canvas>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3 style="margin:0 0 8px 0;color:#9aa7b8">Корреляция: Затраты → Заказы (по дням)</h3>
+    <canvas id="scatterCorr" height="280"></canvas>
+  </section>
+
+  <footer>Работает офлайн • Данные кэшируются локально • © WB Dashboard</footer>
+
+  <script src="app.js"></script>
+  <script> if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js'); </script>
+</body>
+</html>
