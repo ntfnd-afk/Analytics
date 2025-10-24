@@ -41,14 +41,23 @@ async function fetchSheet(sheetId, sheetName) {
   const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tqx=out:json`;
   const res = await fetch(url, { cache: 'no-cache' });
   const txt = await res.text();
-  // ответ обёрнут в JS: google.visualization.Query.setResponse({...})
-  const json = JSON.parse(txt.replace(/^[^({]+/, '').replace(/[^)}]+$/, ''));
-  const cols = json.table.cols.map(c => c.label || c.id);
-  const rows = json.table.rows.map(r => cols.map((_, i) => (r.c[i]?.v ?? '')));
-  // кэшируем локально
+
+  // Универсальный парсер GViz (поддерживает и setResponse(...), и ({...}))
+  const match = txt.match(/\{[\s\S]*\}/);
+  if (!match) {
+    console.error('GViz raw:', txt.slice(0, 200));
+    throw new Error('GViz: не удалось найти JSON-пэйлоад');
+  }
+  const json = JSON.parse(match[0]);
+
+  const cols = (json.table?.cols || []).map(c => c.label || c.id);
+  const rows = (json.table?.rows || []).map(r => cols.map((_, i) => (r.c?.[i]?.v ?? '')));
+
+  // кэш
   localStorage.setItem('wb_cache', JSON.stringify({ ts: Date.now(), rows, cols, sheetId, sheetName }));
   return { rows, cols };
 }
+
 
 function loadCacheIfAny() {
   try {
